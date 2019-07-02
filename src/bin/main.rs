@@ -3,22 +3,38 @@ extern crate elastic_derive;
 #[macro_use]
 extern crate serde_json;
 extern crate elastic;
+extern crate serde;
 
 use elastic::prelude::*;
-use serde_json::Value;
+//use serde_json::Value;
+use serde::{Serialize, Deserialize};
+
+#[derive(Serialize, Deserialize, ElasticType, Debug)]
+struct ElasticTea {
+    x: Option<i32>,
+    str: Option<String>,
+    test: Option<String>,
+    y: Option<f32>
+}
 
 fn main() {
-    println!("Test elastictea crate");
-    let client = SyncClientBuilder::new().build().unwrap();
-    let query = "some query string";
+    let client = SyncClientBuilder::new()
+        .static_node("http://localhost:9200")
+        .params_fluent(|p| p.url_param("pretty", true))
+        .build()
+        .unwrap();
 
     // A search request with a freeform body.
-    let res = client.search::<Value>()
+    let res = client.search::<ElasticTea>()
                     .index("test-index")
                     .body(json!({
                         "query": {
-                            "query_string": {
-                                "query": query
+                            "bool": {
+                                "must": {
+                                    "match": {
+                                        "x": 5
+                                    }
+                                }
                             }
                         }
                     }))
