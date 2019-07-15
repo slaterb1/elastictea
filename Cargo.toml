@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 rettle = { git = "ssh://git@github.com/slaterb1/rettle" }
-elastic = "0.21.0-pre.4"
-elastic_derive = "0.21.0-pre.4"
+elastic = "=0.21.0-pre.4"
+elastic_derive = "=0.21.0-pre.4"
 serde_json = "1"
 serde = "1"
