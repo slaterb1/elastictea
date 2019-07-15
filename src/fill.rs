@@ -14,9 +14,22 @@ use elastic::prelude::*;
 
 ///
 /// Configs to setup Elasticsearch client.
-pub struct EsConfig {
+pub struct EsClient {
     /// Elasticsearch host:port string.
     es_host: String,
+    client: SyncClient,
+}
+
+impl EsClient {
+    pub fn new(es_host: &str) -> EsClient {
+        let client = SyncClientBuilder::new()
+            .static_node(es_host)
+            .params_fluent(|p| p.url_param("pretty", true))
+            .build()
+            .unwrap();
+
+        EsClient { es_host: String::from(es_host), client }
+    }
 }
 
 ///
@@ -24,9 +37,9 @@ pub struct EsConfig {
 pub struct FillEsArg {
     doc_index: String,
     doc_type: String,
-    num_docs: usize,
+    num_docs: u32,
     query: Value,
-    client: SyncClient,
+    es_client: EsClient,
 }
 
 impl FillEsArg {
@@ -37,10 +50,10 @@ impl FillEsArg {
     ///
     /// * `filepath` - filepath for csv to load.
     /// * `buffer_length` - number of csv lines to process at a time.
-    pub fn new(doc_index: &str, doc_type: &str, num_docs: usize, query: Value, client: SyncClient) -> FillEsArg {
+    pub fn new(doc_index: &str, doc_type: &str, num_docs: u32, query: Value, es_client: EsClient) -> FillEsArg {
         let doc_index = String::from(doc_index);
         let doc_type = String::from(doc_type);
-        FillEsArg { doc_index, doc_type, num_docs, query, client }
+        FillEsArg { doc_index, doc_type, num_docs, query, es_client }
     }
 }
 
@@ -86,10 +99,26 @@ fn fill_from_es<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn 
     match args {
         None => panic!("Need to pass \"FillEsArg\" configs to run this Fill operation"),
         Some(box_args) => {
-            // unwrap params
+            // unwrap params and unpack them
             let box_args = box_args.as_any().downcast_ref::<FillEsArg>().unwrap();
+            let FillEsArg { doc_index, doc_type, num_docs, query, es_client } = box_args;
+            let es_client = es_client.client;
 
-            //TODO continue adding client interaction here
+            // loop over the data in batches, sending to the brewery
+            loop {
+                let res = es_client.search::<T>()
+                                   .index(&doc_index[..])
+                                   .ty(&doc_type[..])
+                                   .body(json!({
+                                       "from": 0,
+                                       "size": num_docs,
+                                       "query": query
+                                   }))
+                                   .send()
+                                   .unwrap();
+               println!("{:?}", res);
+               break;
+            }
         }
     }
 }
