@@ -99,19 +99,21 @@ fn fill_from_es<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn 
         Some(box_args) => {
             // unwrap params and unpack them
             let box_args = box_args.as_any().downcast_ref::<FillEsArg>().unwrap();
+            let FillEsArg { doc_index, doc_type, num_docs, query, es_client } = box_args;
+            let es_client = &es_client.client;
 
             // loop over the data in batches, sending to the brewery
             loop {
-                let res = box_args.es_client.client.search::<T>()
-                                                   .index(box_args.doc_index)
-                                                   .ty(box_args.doc_type)
-                                                   .body(json!({
-                                                       "from": 0,
-                                                       "size": box_args.num_docs,
-                                                       "query": box_args.query
-                                                   }))
-                                                   .send()
-                                                   .unwrap();
+                let res = es_client.search::<T>()
+                                   .index(*doc_index)
+                                   .ty(*doc_type)
+                                   .body(json!({
+                                       "from": 0,
+                                       "size": *num_docs,
+                                       "query": *query
+                                   }))
+                                   .send()
+                                   .unwrap();
                println!("{:?}", res);
                break;
             }
