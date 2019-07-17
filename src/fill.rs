@@ -35,8 +35,8 @@ impl EsClient {
 ///
 /// Ingredient params for FillEsTea.
 pub struct FillEsArg {
-    doc_index: String,
-    doc_type: String,
+    doc_index: &'static str,
+    doc_type: &'static str,
     num_docs: u32,
     query: Value,
     es_client: EsClient,
@@ -50,9 +50,7 @@ impl FillEsArg {
     ///
     /// * `filepath` - filepath for csv to load.
     /// * `buffer_length` - number of csv lines to process at a time.
-    pub fn new(doc_index: &str, doc_type: &str, num_docs: u32, query: Value, es_client: EsClient) -> FillEsArg {
-        let doc_index = String::from(doc_index);
-        let doc_type = String::from(doc_type);
+    pub fn new(doc_index: &'static str, doc_type: &'static str, num_docs: u32, query: Value, es_client: EsClient) -> FillEsArg {
         FillEsArg { doc_index, doc_type, num_docs, query, es_client }
     }
 }
@@ -66,7 +64,7 @@ impl Argument for FillEsArg {
 pub struct FillEsTea {}
 
 impl FillEsTea {
-    pub fn new<T: Tea + Send + 'static>(name: &str, source: &str, params: FillEsArg) -> Box<Fill> 
+    pub fn new<T: Tea + Send + 'static>(name: &str, source: &str, params: FillEsArg, index: &'static str) -> Box<Fill> 
         where for<'de> T: Deserialize<'de>
     {
         Box::new(Fill {
@@ -101,21 +99,19 @@ fn fill_from_es<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn 
         Some(box_args) => {
             // unwrap params and unpack them
             let box_args = box_args.as_any().downcast_ref::<FillEsArg>().unwrap();
-            let FillEsArg { doc_index, doc_type, num_docs, query, es_client } = box_args;
-            let es_client = es_client.client;
 
             // loop over the data in batches, sending to the brewery
             loop {
-                let res = es_client.search::<T>()
-                                   .index(&doc_index[..])
-                                   .ty(&doc_type[..])
-                                   .body(json!({
-                                       "from": 0,
-                                       "size": num_docs,
-                                       "query": query
-                                   }))
-                                   .send()
-                                   .unwrap();
+                let res = box_args.es_client.client.search::<T>()
+                                                   .index(box_args.doc_index)
+                                                   .ty(box_args.doc_type)
+                                                   .body(json!({
+                                                       "from": 0,
+                                                       "size": box_args.num_docs,
+                                                       "query": box_args.query
+                                                   }))
+                                                   .send()
+                                                   .unwrap();
                println!("{:?}", res);
                break;
             }
