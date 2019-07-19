@@ -118,7 +118,7 @@ fn fill_from_es<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn 
                 let mut tea_batch: Vec<Box<dyn Tea + Send>> = Vec::with_capacity(*num_docs);
 
                 for hit in res.hits() {
-                    //TODO: write T::new() to extract ElasticTea from HitWrapper
+                    //TODO: write helper function to extract ElasticTea from HitWrapper
                     let tea: T = hit;
                     tea_batch.push(Box::new(tea))
                 }
