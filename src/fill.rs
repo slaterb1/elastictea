@@ -64,7 +64,7 @@ impl Argument for FillEsArg {
 pub struct FillEsTea {}
 
 impl FillEsTea {
-    pub fn new<T: Tea + Send + 'static>(name: &str, source: &str, params: FillEsArg, index: &'static str) -> Box<Fill> 
+    pub fn new<T: Tea + Send + 'static>(name: &str, source: &str, params: FillEsArg) -> Box<Fill> 
         where for<'de> T: Deserialize<'de>
     {
         Box::new(Fill {

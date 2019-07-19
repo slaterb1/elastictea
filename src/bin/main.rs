@@ -2,11 +2,14 @@ extern crate elastictea;
 extern crate rettle;
 extern crate serde;
 
+#[macro_use]
+extern crate elastic_derive;
+
 use elastictea::fill::{FillEsArg, FillEsTea, EsClient};
 use rettle::tea::Tea;
 use rettle::brewer::Brewery;
 use rettle::pot::Pot;
-use rettle::ingredient::{Argument, Steep};
+use rettle::ingredient::Pour;
 
 use std::any::Any;
 use std::time::Instant;
@@ -35,7 +38,9 @@ fn main() {
                                          "_doc",
                                          10,
                                          {
-                                             "match_all": {}
+                                             "query_string": {
+                                                 "query": "*"
+                                             }
                                          },
                                          es_client
                                         );
@@ -43,7 +48,7 @@ fn main() {
 
     let brewery = Brewery::new(4, Instant::now());
     let mut new_pot = Pot::new();
-    let fill_elastictea = FillEsTea::new<ElasticTea>("elastic_tea_test", "test_index", test_fill_esarg);
+    let fill_elastictea = FillEsTea::new::<ElasticTea>("elastic_tea_test", "test_index", test_fill_esarg);
 
     new_pot.add_source(fill_elastictea);
     new_pot.add_ingredient(Box::new(Pour{
@@ -52,7 +57,9 @@ fn main() {
             tea_batch.into_iter()
                 .map(|tea| {
                     println!("{:?}", tea);
+                    tea
                 })
+                .collect()
         }),
         params: None,
     }));
