@@ -4,6 +4,8 @@ extern crate serde;
 
 #[macro_use]
 extern crate elastic_derive;
+#[macro_use]
+extern crate serde_json;
 
 use elastictea::fill::{FillEsArg, FillEsTea, EsClient};
 use rettle::tea::Tea;
@@ -17,10 +19,10 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, ElasticType, Debug)]
 struct ElasticTea {
-    x: Option<i32>,
-    str: Option<String>,
-    test: Option<String>,
-    y: Option<f32>
+    ListingId: Option<String>,
+    ListPrice: Option<f32>,
+    City: Option<String>,
+    BathroomsTotalInteger: Option<String>
 }
 
 impl Tea for ElasticTea {
@@ -37,11 +39,11 @@ fn main() {
     let test_fill_esarg = FillEsArg::new("test-index1",
                                          "_doc",
                                          10,
-                                         {
+                                         json!({
                                              "query_string": {
                                                  "query": "*"
                                              }
-                                         },
+                                         }),
                                          es_client
                                         );
 
@@ -63,6 +65,7 @@ fn main() {
         }),
         params: None,
     }));
+    new_pot.brew(&brewery);
 
     // Iterate through the hits in the response.
     //println!("{:?}", res);
