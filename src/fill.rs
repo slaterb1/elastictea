@@ -91,7 +91,7 @@ fn call_brewery(brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + S
 /// * `args` - Params specifying the EsClient and query params to get docs.
 /// * `brewery` - Brewery that processes the data.
 /// * `recipe` - Recipe for the ETL used by the Brewery.
-fn fill_from_es<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>) 
+fn fill_from_es<T: Tea + Send + Debug + 'static>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>) 
     where for<'de> T: Deserialize<'de>
 {
     match args {
