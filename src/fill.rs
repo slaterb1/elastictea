@@ -105,14 +105,16 @@ fn fill_from_es<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn 
             let es_client = &es_client.client;
 
             // loop over the data in batches, sending to the brewery
+            let mut start_pos = 0;
             loop {
+                // get docs from Elasticsearch client
                 let res = es_client
                     .search::<T>()
                     .index(*doc_index)
                     .ty(*doc_type)
                     .body(
                         json!({
-                            "from": 0,
+                            "from": start_pos,
                             "size": *num_docs,
                             "query": *query
                         })
@@ -120,15 +122,27 @@ fn fill_from_es<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn 
                     .send()
                     .unwrap();
                 
-                let tea_batch: Vec<Box<dyn Tea + Send>> = res.into_documents()
+                let tea_batch: Vec<Box<dyn Tea + Send>> = res
+                    .into_documents()
                     .map(|tea| {
                         Box::new(tea) as Box<dyn Tea + Send>
                     })
                     .collect();
 
-                let recipe = Arc::clone(&recipe);
-                call_brewery(brewery, recipe, tea_batch);
-                break;
+                // If docs are found, send to brewery for processing.
+                if tea_batch.len() == 0 {
+                    break;
+                } else {
+                    let recipe = Arc::clone(&recipe);
+                    call_brewery(brewery, recipe, tea_batch);
+                    start_pos += *num_docs;
+                }
+
+                // Break if doc offset + size is > 10000.
+                // TODO: When scroll is supported, this can be removed
+                if start_pos + num_docs > 10000 {
+                    break;
+                }
             }
         }
     }
