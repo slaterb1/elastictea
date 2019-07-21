@@ -91,6 +91,9 @@ fn call_brewery(brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + S
     });
 }
 
+//fn extract_tea(es_result) -> Vec<Box<dyn Tea + Send>> {
+//}
+
 fn fill_from_es<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>) 
     where for<'de> T: Deserialize<'de>
 {
@@ -115,13 +118,19 @@ fn fill_from_es<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn 
                                    .send()
                                    .unwrap();
                 
-                let mut tea_batch: Vec<Box<dyn Tea + Send>> = Vec::with_capacity(*num_docs);
+                //let mut tea_batch: Vec<Box<dyn Tea + Send>> = Vec::with_capacity(*num_docs);
 
-                for hit in res.hits() {
-                    //TODO: write helper function to extract ElasticTea from HitWrapper
-                    let tea: T = hit;
-                    tea_batch.push(Box::new(tea))
-                }
+                //for hit in res.documents() {
+                //    tea_batch.push(Box::new(hit));
+                //}
+                let tea_batch: Vec<Box<dyn Tea + Send>> = res.into_documents()
+                    .map(|tea| {
+                        Box::new(tea) as Box<dyn Tea + Send>
+                    })
+                    .collect();
+
+                let recipe = Arc::clone(&recipe);
+                call_brewery(brewery, recipe, tea_batch);
                 break;
             }
         }
