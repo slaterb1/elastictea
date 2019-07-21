@@ -15,11 +15,16 @@ use elastic::prelude::*;
 ///
 /// Configs to setup Elasticsearch client.
 pub struct EsClient {
-    /// Elasticsearch host:port string.
     client: SyncClient,
 }
 
 impl EsClient {
+    ///
+    /// Returns EsClient with inner client connected to specified es_host.
+    /// 
+    /// # Arguments
+    ///
+    /// * `es_host` - Elasticsearch host:port pair to setup sync client.
     pub fn new(es_host: &str) -> EsClient {
         let client = SyncClientBuilder::new()
             .static_node(es_host)
@@ -47,8 +52,11 @@ impl FillEsArg {
     ///
     /// # Arguments
     ///
-    /// * `filepath` - filepath for csv to load.
-    /// * `buffer_length` - number of csv lines to process at a time.
+    /// * `doc_index` - Elasticsearch index to pull data from.
+    /// * `doc_type` - Elasticsearch doc type to pull data from.
+    /// * `num_docs` - Number of docs to pull in each batch.
+    /// * `query` - Query to run and match Elasticsearch docs against.
+    /// * `es_client` - EsClient used to request docs from.
     pub fn new(doc_index: &'static str, doc_type: &'static str, num_docs: usize, query: Value, es_client: EsClient) -> FillEsArg {
         FillEsArg { doc_index, doc_type, num_docs, query, es_client }
     }
@@ -62,7 +70,17 @@ impl Argument for FillEsArg {
 
 pub struct FillEsTea {}
 
+///
+/// Wrapper to simplifiy the creation of the Fill Ingredient to be used in the rettle Pot.
 impl FillEsTea {
+    ///
+    /// Returns the Fill Ingredient to be added to the `rettle` Pot.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - Ingredient name.
+    /// * `source` - Ingredient source.
+    /// * `params` - Params data structure holding the EsClient and query params for pulling docs.
     pub fn new<T: Tea + Send + 'static>(name: &str, source: &str, params: FillEsArg) -> Box<Fill> 
         where for<'de> T: Deserialize<'de>
     {
@@ -90,9 +108,15 @@ fn call_brewery(brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + S
     });
 }
 
-//fn extract_tea(es_result) -> Vec<Box<dyn Tea + Send>> {
-//}
-
+///
+/// Implements the ES request, deserialization to specified data struct, and passes the data to the
+/// brewery for processing.
+///
+/// # Arguments
+///
+/// * `args` - Params specifying the EsClient and query params to get docs.
+/// * `brewery` - Brewery that processes the data.
+/// * `recipe` - Recipe for the ETL used by the Brewery.
 fn fill_from_es<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>) 
     where for<'de> T: Deserialize<'de>
 {
