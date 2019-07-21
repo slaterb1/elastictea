@@ -172,3 +172,62 @@ fn fill_from_es<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn 
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::{FillEsArg, FillEsTea, EsClient};
+    use rettle::tea::Tea;
+    use rettle::pot::Pot;
+    use serde::Deserialize;
+    use std::any::Any;
+
+    #[derive(Default, Clone, Debug, Deserialize)]
+    struct TestEsTea {
+        name: String,
+        value: i32
+    }
+
+    impl Tea for TestEsTea {
+        fn as_any(&self) -> &dyn Any {
+            self
+        }
+        fn new(self: Box<Self>) -> Box<dyn Tea + Send> {
+            self
+        }
+    }
+
+    #[test]
+    fn create_es_args() {
+        let es_client = EsClient::new("test:test");
+        let es_args = FillEsArg::new(
+            "test_index", 
+            "_doc",
+            50,
+            json!({
+                "match_all": {}
+            }),
+            es_client
+        );
+        assert_eq!(es_args.doc_index, "test_index");
+        assert_eq!(es_args.doc_type, "_doc");
+    }
+
+    #[test]
+    fn create_fill_estea() {
+        let es_client = EsClient::new("test:test");
+        let es_args = FillEsArg::new(
+            "test_index", 
+            "_doc",
+            50,
+            json!({
+                "match_all": {}
+            }),
+            es_client
+        );
+        let fill_estea = FillEsTea::new::<TestEsTea>("test_es", "fixture", es_args);
+        let mut new_pot = Pot::new();
+        new_pot.add_source(fill_estea);
+        assert_eq!(new_pot.get_sources().len(), 1);
+        assert_eq!(new_pot.get_sources()[0].get_name(), "test_es");
+    }
+
+}
