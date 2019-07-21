@@ -36,16 +36,15 @@ impl Tea for ElasticTea {
 
 fn main() {
     let es_client = EsClient::new("http://localhost:9200");
-    let test_fill_esarg = FillEsArg::new("test-index1",
-                                         "_doc",
-                                         10,
-                                         json!({
-                                             "query_string": {
-                                                 "query": "*"
-                                             }
-                                         }),
-                                         es_client
-                                        );
+    let test_fill_esarg = FillEsArg::new(
+        "test-index1",
+        "_doc",
+        200,
+        json!({
+            "match_all": {}
+        }),
+        es_client
+    );
 
 
     let brewery = Brewery::new(4, Instant::now());
@@ -55,10 +54,11 @@ fn main() {
     new_pot.add_source(fill_elastictea);
     new_pot.add_ingredient(Box::new(Pour{
         name: String::from("pour1"),
-        computation: Box::new(|tea_batch, args| {
-            tea_batch.into_iter()
+        computation: Box::new(|tea_batch, _args| {
+            tea_batch
+                .into_iter()
                 .map(|tea| {
-                    println!("{:?}", tea);
+                    //println!("{:?}", tea);
                     tea
                 })
                 .collect()
@@ -66,11 +66,4 @@ fn main() {
         params: None,
     }));
     new_pot.brew(&brewery);
-
-    // Iterate through the hits in the response.
-    //println!("{:?}", res);
-    //for hit in res.hits() {
-    //    println!("{:?}", hit);
-    //}
-    
 }
