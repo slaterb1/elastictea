@@ -16,7 +16,6 @@ use elastic::prelude::*;
 /// Configs to setup Elasticsearch client.
 pub struct EsClient {
     /// Elasticsearch host:port string.
-    es_host: String,
     client: SyncClient,
 }
 
@@ -28,7 +27,7 @@ impl EsClient {
             .build()
             .unwrap();
 
-        EsClient { es_host: String::from(es_host), client }
+        EsClient { client }
     }
 }
 
@@ -107,22 +106,20 @@ fn fill_from_es<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn 
 
             // loop over the data in batches, sending to the brewery
             loop {
-                let res = es_client.search::<T>()
-                                   .index(*doc_index)
-                                   .ty(*doc_type)
-                                   .body(json!({
-                                       "from": 0,
-                                       "size": *num_docs,
-                                       "query": *query
-                                   }))
-                                   .send()
-                                   .unwrap();
+                let res = es_client
+                    .search::<T>()
+                    .index(*doc_index)
+                    .ty(*doc_type)
+                    .body(
+                        json!({
+                            "from": 0,
+                            "size": *num_docs,
+                            "query": *query
+                        })
+                    )
+                    .send()
+                    .unwrap();
                 
-                //let mut tea_batch: Vec<Box<dyn Tea + Send>> = Vec::with_capacity(*num_docs);
-
-                //for hit in res.documents() {
-                //    tea_batch.push(Box::new(hit));
-                //}
                 let tea_batch: Vec<Box<dyn Tea + Send>> = res.into_documents()
                     .map(|tea| {
                         Box::new(tea) as Box<dyn Tea + Send>
