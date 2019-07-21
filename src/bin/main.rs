@@ -1,12 +1,3 @@
-extern crate elastictea;
-extern crate rettle;
-extern crate serde;
-
-#[macro_use]
-extern crate elastic_derive;
-#[macro_use]
-extern crate serde_json;
-
 use elastictea::fill::{FillEsArg, FillEsTea};
 use elastictea::client::EsClient;
 use rettle::tea::Tea;
@@ -17,8 +8,9 @@ use rettle::ingredient::Pour;
 use std::any::Any;
 use std::time::Instant;
 use serde::{Serialize, Deserialize};
+use serde_json::json;
 
-#[derive(Serialize, Deserialize, ElasticType, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 struct ElasticTea {
     ListingId: Option<String>,
     ListPrice: Option<f32>,

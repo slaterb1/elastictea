@@ -1,7 +1,4 @@
-extern crate rettle;
-extern crate elastic;
-
-use super::client::EsClient;
+use crate::client::EsClient;
 
 use rettle::ingredient::{Ingredient, Argument, Fill};
 use rettle::brewer::{Brewery, make_tea};
@@ -11,7 +8,7 @@ use std::sync::{Arc, RwLock};
 use std::any::Any;
 use serde::Deserialize;
 use std::fmt::Debug;
-use serde_json::Value;
+use serde_json::{Value, json};
 
 ///
 /// Ingredient params for FillEsTea.
@@ -152,10 +149,11 @@ fn fill_from_es<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn 
 #[cfg(test)]
 mod tests {
     use super::{FillEsArg, FillEsTea};
-    use super::super::client::EsClient;
+    use crate::client::EsClient;
     use rettle::tea::Tea;
     use rettle::pot::Pot;
     use serde::Deserialize;
+    use serde_json::json;
     use std::any::Any;
 
     #[derive(Default, Clone, Debug, Deserialize)]
