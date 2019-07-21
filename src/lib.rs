@@ -4,3 +4,4 @@ extern crate elastic_derive;
 extern crate serde_json;
 
 pub mod fill;
+pub mod client;

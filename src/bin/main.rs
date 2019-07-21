@@ -7,7 +7,8 @@ extern crate elastic_derive;
 #[macro_use]
 extern crate serde_json;
 
-use elastictea::fill::{FillEsArg, FillEsTea, EsClient};
+use elastictea::fill::{FillEsArg, FillEsTea};
+use elastictea::client::EsClient;
 use rettle::tea::Tea;
 use rettle::brewer::Brewery;
 use rettle::pot::Pot;

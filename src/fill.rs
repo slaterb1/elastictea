@@ -1,6 +1,8 @@
 extern crate rettle;
 extern crate elastic;
 
+use super::client::EsClient;
+
 use rettle::ingredient::{Ingredient, Argument, Fill};
 use rettle::brewer::{Brewery, make_tea};
 use rettle::tea::Tea;
@@ -10,31 +12,6 @@ use std::any::Any;
 use serde::Deserialize;
 use std::fmt::Debug;
 use serde_json::Value;
-use elastic::prelude::*;
-
-///
-/// Configs to setup Elasticsearch client.
-pub struct EsClient {
-    client: SyncClient,
-}
-
-impl EsClient {
-    ///
-    /// Returns EsClient with inner client connected to specified es_host.
-    /// 
-    /// # Arguments
-    ///
-    /// * `es_host` - Elasticsearch host:port pair to setup sync client.
-    pub fn new(es_host: &str) -> EsClient {
-        let client = SyncClientBuilder::new()
-            .static_node(es_host)
-            .params_fluent(|p| p.url_param("pretty", true))
-            .build()
-            .unwrap();
-
-        EsClient { client }
-    }
-}
 
 ///
 /// Ingredient params for FillEsTea.
@@ -174,7 +151,8 @@ fn fill_from_es<T: Tea + Send + Debug + ?Sized + 'static>(args: &Option<Box<dyn 
 
 #[cfg(test)]
 mod tests {
-    use super::{FillEsArg, FillEsTea, EsClient};
+    use super::{FillEsArg, FillEsTea};
+    use super::super::client::EsClient;
     use rettle::tea::Tea;
     use rettle::pot::Pot;
     use serde::Deserialize;
