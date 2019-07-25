@@ -79,7 +79,7 @@ fn pour_to_es<T: Tea + Send + Debug + Serialize + 'static>(tea_batch: Vec<Box<dy
             let es_client = &es_client.client;
 
             // Format tea_batch as bulk request
-            let bulk_req = tea_batch.into_iter()
+            let bulk_req = tea_batch.iter()
                 .map(|tea| {
                     let tea = tea.as_any().downcast_ref::<T>().unwrap();
                     bulk_raw().index(tea)
@@ -93,6 +93,8 @@ fn pour_to_es<T: Tea + Send + Debug + Serialize + 'static>(tea_batch: Vec<Box<dy
                 .extend(bulk_req)
                 .send()
                 .unwrap();
+
+            //TODO: inspect res to find errors.
 
             tea_batch
                 
