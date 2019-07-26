@@ -14,10 +14,8 @@ use serde_json::json;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct ElasticTea {
-    ListingId: Option<String>,
-    ListPrice: Option<f32>,
-    City: Option<String>,
-    BathroomsTotalInteger: Option<String>
+    name: Option<String>,
+    avg: Option<f32>,
 }
 
 impl Tea for ElasticTea {
@@ -32,7 +30,7 @@ impl Tea for ElasticTea {
 fn main() {
     let es_client = Arc::new(EsClient::new("http://localhost:9200"));
     let test_fill_esarg = FillEsArg::new(
-        "test-index1",
+        "test-fill-index",
         "_doc",
         200,
         json!({
@@ -42,7 +40,7 @@ fn main() {
     );
 
     let test_pour_esarg = PourEsArg::new(
-        "test-pour-index2",
+        "test-pour-index",
         "_doc",
         Arc::clone(&es_client),
     );
