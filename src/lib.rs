@@ -9,7 +9,7 @@ Generic Fill Pour Ingredient crate for the `rettle` ETL.
 - PourEsTea: Wrapper to simplifiy the creation of the Pour Ingredient to be used in the rettle Pot.
 
 ## Example
-```rust
+```ignore
 fn main() {
     let es_client = Arc::new(EsClient::new("http://localhost:9200"));
     let test_fill_esarg = FillEsArg::new(

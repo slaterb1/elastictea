@@ -125,7 +125,6 @@ mod tests {
     use rettle::tea::Tea;
     use rettle::pot::Pot;
     use serde::Serialize;
-    use serde_json::json;
     use std::any::Any;
     use std::sync::Arc;
 
@@ -165,7 +164,7 @@ mod tests {
             Arc::clone(&es_client),
         );
         let pour_estea = PourEsTea::new::<TestEsTea>("test_es", es_args);
-        let mut new_pot = Pot::new();
+        let new_pot = Pot::new();
         new_pot.add_ingredient(pour_estea);
         assert_eq!(new_pot.get_recipe().read().unwrap().len(), 1);
         assert_eq!(new_pot.get_recipe().read().unwrap()[0].get_name(), "test_es");
