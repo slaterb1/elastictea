@@ -6,16 +6,17 @@ use rettle::tea::Tea;
 use serde::Serialize;
 use std::any::Any;
 use std::fmt::Debug;
-//use serde_json::{Value, json};
+use std::sync::Arc;
 
 use elastic::prelude::*;
+use elastic::error::Error;
 
 ///
 /// Ingredient params for PourEsTea.
 pub struct PourEsArg {
     doc_index: &'static str,
     doc_type: &'static str,
-    es_client: EsClient,
+    es_client: Arc<EsClient>,
 }
 
 impl PourEsArg {
@@ -27,7 +28,7 @@ impl PourEsArg {
     /// * `doc_index` - Elasticsearch index to send data to.
     /// * `doc_type` - Elasticsearch doc type to send data to.
     /// * `es_client` - EsClient used to request docs from.
-    pub fn new(doc_index: &'static str, doc_type: &'static str, es_client: EsClient) -> PourEsArg {
+    pub fn new(doc_index: &'static str, doc_type: &'static str, es_client: Arc<EsClient>) -> PourEsArg {
         PourEsArg { doc_index, doc_type, es_client }
     }
 }
@@ -91,10 +92,25 @@ fn pour_to_es<T: Tea + Send + Debug + Serialize + 'static>(tea_batch: Vec<Box<dy
                 .index(*doc_index)
                 .ty(*doc_type)
                 .extend(bulk_req)
-                .send()
-                .unwrap();
+                .send();
 
-            //TODO: inspect res to find errors.
+            // Inspect res to find errors.
+            match res {
+                Ok(res) => {
+                    if res.is_err(){
+                        println!("Some bulk insert items failed!");
+                        for doc in res {
+                            match doc {
+                                Ok(_) => (),
+                                Err(doc) => println!("Failed to insert doc: {:?}", doc),
+                            }
+                        }
+                    }
+                },
+                Err(Error::Api(e)) => println!("Failed to send bulk request! REST API Error: {}", e),
+                Err(e) => println!("HTTP or JSON failure! Error: {}", e),
+            }
+                    
 
             tea_batch
                 
