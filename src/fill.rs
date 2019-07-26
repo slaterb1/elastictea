@@ -206,5 +206,4 @@ mod tests {
         assert_eq!(new_pot.get_sources().len(), 1);
         assert_eq!(new_pot.get_sources()[0].get_name(), "test_es");
     }
-
 }
