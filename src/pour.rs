@@ -107,8 +107,8 @@ fn pour_to_es<T: Tea + Send + Debug + Serialize + 'static>(tea_batch: Vec<Box<dy
                         }
                     }
                 },
-                Err(Error::Api(e)) => println!("Failed to send bulk request! REST API Error: {}", e),
-                Err(e) => println!("HTTP or JSON failure! Error: {}", e),
+                Err(Error::Api(e)) => println!("Failed to send bulk request! REST API Error: {:?}", e),
+                Err(e) => println!("HTTP or JSON failure! Error: {:?}", e),
             }
                     
 
