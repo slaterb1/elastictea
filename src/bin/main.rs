@@ -14,7 +14,6 @@ use serde_json::json;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct ElasticTea {
-    id: String,
     ListingId: Option<String>,
     ListPrice: Option<f32>,
     City: Option<String>,
