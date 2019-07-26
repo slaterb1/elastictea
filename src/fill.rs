@@ -10,6 +10,8 @@ use serde::Deserialize;
 use std::fmt::Debug;
 use serde_json::{Value, json};
 
+use elastic::error::Error;
+
 ///
 /// Ingredient params for FillEsTea.
 pub struct FillEsArg {
@@ -117,29 +119,41 @@ fn fill_from_es<T: Tea + Send + Debug + 'static>(args: &Option<Box<dyn Argument 
                             "query": *query
                         })
                     )
-                    .send()
-                    .unwrap();
-                
-                let tea_batch: Vec<Box<dyn Tea + Send>> = res
-                    .into_documents()
-                    .map(|tea| {
-                        Box::new(tea) as Box<dyn Tea + Send>
-                    })
-                    .collect();
+                    .send();
 
-                // If docs are found, send to brewery for processing.
-                if tea_batch.len() == 0 {
-                    break;
-                } else {
-                    let recipe = Arc::clone(&recipe);
-                    call_brewery(brewery, recipe, tea_batch);
-                    start_pos += *num_docs;
-                }
+                // Inspect res to find errors.
+                match res {
+                    Ok(res) => {
+                        let tea_batch: Vec<Box<dyn Tea + Send>> = res
+                            .into_documents()
+                            .map(|tea| {
+                                Box::new(tea) as Box<dyn Tea + Send>
+                            })
+                            .collect();
 
-                // Break if doc offset + size is > 10000.
-                // TODO: When scroll is supported, this can be removed
-                if start_pos + num_docs > 10000 {
-                    break;
+                        // If docs are found, send to brewery for processing.
+                        if tea_batch.len() == 0 {
+                            break;
+                        } else {
+                            let recipe = Arc::clone(&recipe);
+                            call_brewery(brewery, recipe, tea_batch);
+                            start_pos += *num_docs;
+                        }
+
+                        // Break if doc offset + size is > 10000.
+                        // TODO: When scroll is supported, this can be removed
+                        if start_pos + num_docs > 10000 {
+                            break;
+                        }
+                    },
+                    Err(Error::Api(e)) => {
+                        println!("Failed to receive docs! REST API Error: {:?}", e);
+                        break;
+                    },
+                    Err(e) => {
+                        println!("HTTP or JSON failure! Error: {:?}", e);
+                        break;
+                    }
                 }
             }
         }
