@@ -17,7 +17,7 @@ pub struct FillEsArg {
     doc_type: &'static str,
     num_docs: usize,
     query: Value,
-    es_client: EsClient,
+    es_client: Arc<EsClient>,
 }
 
 impl FillEsArg {
@@ -31,7 +31,7 @@ impl FillEsArg {
     /// * `num_docs` - Number of docs to pull in each batch.
     /// * `query` - Query to run and match Elasticsearch docs against.
     /// * `es_client` - EsClient used to request docs from.
-    pub fn new(doc_index: &'static str, doc_type: &'static str, num_docs: usize, query: Value, es_client: EsClient) -> FillEsArg {
+    pub fn new(doc_index: &'static str, doc_type: &'static str, num_docs: usize, query: Value, es_client: Arc<EsClient>) -> FillEsArg {
         FillEsArg { doc_index, doc_type, num_docs, query, es_client }
     }
 }
