@@ -155,6 +155,7 @@ mod tests {
     use serde::Deserialize;
     use serde_json::json;
     use std::any::Any;
+    use std::sync::Arc;
 
     #[derive(Default, Clone, Debug, Deserialize)]
     struct TestEsTea {
@@ -173,7 +174,7 @@ mod tests {
 
     #[test]
     fn create_es_args() {
-        let es_client = EsClient::new("test:test");
+        let es_client = Arc::new(EsClient::new("test:test"));
         let es_args = FillEsArg::new(
             "test_index", 
             "_doc",
@@ -181,7 +182,7 @@ mod tests {
             json!({
                 "match_all": {}
             }),
-            es_client
+            Arc::clone(&es_client),
         );
         assert_eq!(es_args.doc_index, "test_index");
         assert_eq!(es_args.doc_type, "_doc");
@@ -189,7 +190,7 @@ mod tests {
 
     #[test]
     fn create_fill_estea() {
-        let es_client = EsClient::new("test:test");
+        let es_client = Arc::new(EsClient::new("test:test"));
         let es_args = FillEsArg::new(
             "test_index", 
             "_doc",
@@ -197,7 +198,7 @@ mod tests {
             json!({
                 "match_all": {}
             }),
-            es_client
+            Arc::clone(&es_client),
         );
         let fill_estea = FillEsTea::new::<TestEsTea>("test_es", "fixture", es_args);
         let mut new_pot = Pot::new();

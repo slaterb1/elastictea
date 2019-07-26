@@ -124,11 +124,12 @@ mod tests {
     use crate::client::EsClient;
     use rettle::tea::Tea;
     use rettle::pot::Pot;
-    use serde::Deserialize;
+    use serde::Serialize;
     use serde_json::json;
     use std::any::Any;
+    use std::sync::Arc;
 
-    #[derive(Default, Clone, Debug, Deserialize)]
+    #[derive(Default, Clone, Debug, Serialize)]
     struct TestEsTea {
         name: String,
         value: i32
@@ -145,15 +146,11 @@ mod tests {
 
     #[test]
     fn create_es_args() {
-        let es_client = EsClient::new("test:test");
+        let es_client = Arc::new(EsClient::new("test:test"));
         let es_args = PourEsArg::new(
             "test_index", 
             "_doc",
-            50,
-            json!({
-                "match_all": {}
-            }),
-            es_client
+            Arc::clone(&es_client),
         );
         assert_eq!(es_args.doc_index, "test_index");
         assert_eq!(es_args.doc_type, "_doc");
@@ -161,21 +158,17 @@ mod tests {
 
     #[test]
     fn create_fill_estea() {
-        let es_client = EsClient::new("test:test");
+        let es_client = Arc::new(EsClient::new("test:test"));
         let es_args = PourEsArg::new(
             "test_index", 
             "_doc",
-            50,
-            json!({
-                "match_all": {}
-            }),
-            es_client
+            Arc::clone(&es_client),
         );
-        let fill_estea = PourEsTea::new::<TestEsTea>("test_es", "fixture", es_args);
+        let pour_estea = PourEsTea::new::<TestEsTea>("test_es", es_args);
         let mut new_pot = Pot::new();
-        new_pot.add_source(fill_estea);
-        assert_eq!(new_pot.get_sources().len(), 1);
-        assert_eq!(new_pot.get_sources()[0].get_name(), "test_es");
+        new_pot.add_ingredient(pour_estea);
+        assert_eq!(new_pot.get_recipe().read().unwrap().len(), 1);
+        assert_eq!(new_pot.get_recipe().read().unwrap()[0].get_name(), "test_es");
     }
 
 }
