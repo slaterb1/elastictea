@@ -141,7 +141,6 @@ fn fill_from_es<T: Tea + Send + Debug + 'static>(args: &Option<Box<dyn Argument 
                 if start_pos + num_docs > 10000 {
                     break;
                 }
-                break;
             }
         }
     }
