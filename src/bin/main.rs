@@ -5,7 +5,6 @@ use elastictea::client::EsClient;
 use rettle::tea::Tea;
 use rettle::brewer::Brewery;
 use rettle::pot::Pot;
-use rettle::ingredient::Pour;
 
 use std::any::Any;
 use std::time::Instant;
@@ -15,6 +14,7 @@ use serde_json::json;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct ElasticTea {
+    id: String,
     ListingId: Option<String>,
     ListPrice: Option<f32>,
     City: Option<String>,
