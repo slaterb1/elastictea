@@ -1,7 +1,6 @@
 # elastictea
 Generic Fill Pour Ingredient crate for the `rettle` ETL.
 
-
 ## Data Structures
 - FillEsArg: Ingredient params for FillEsTea
 - FillEsTea: Wrapper to simplifiy the creation of the Fill Ingredient to be used in the rettle Pot.
