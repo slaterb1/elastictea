@@ -1,8 +1,13 @@
 use crate::client::EsClient;
 
-use rettle::ingredient::{Ingredient, Argument, Fill};
-use rettle::brewery::{Brewery, make_tea};
-use rettle::tea::Tea;
+use rettle::{
+    Ingredient, 
+    Argument,
+    Fill,
+    Brewery,
+    make_tea,
+    Tea,
+};
 
 use std::sync::{Arc, RwLock};
 use std::any::Any;
@@ -164,8 +169,10 @@ fn fill_from_es<T: Tea + Send + Debug + 'static>(args: &Option<Box<dyn Argument 
 mod tests {
     use super::{FillEsArg, FillEsTea};
     use crate::client::EsClient;
-    use rettle::tea::Tea;
-    use rettle::pot::Pot;
+    use rettle::{
+        Tea,
+        Pot,
+    };
     use serde::Deserialize;
     use serde_json::json;
     use std::any::Any;

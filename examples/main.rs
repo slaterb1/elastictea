@@ -2,9 +2,11 @@ use elastictea::fill::{FillEsArg, FillEsTea};
 use elastictea::pour::{PourEsArg, PourEsTea};
 use elastictea::client::EsClient;
 
-use rettle::tea::Tea;
-use rettle::brewery::Brewery;
-use rettle::pot::Pot;
+use rettle::{
+    Tea,
+    Brewery,
+    Pot,
+};
 
 use std::any::Any;
 use std::time::Instant;
