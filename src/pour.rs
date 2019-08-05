@@ -1,7 +1,10 @@
 use crate::client::EsClient;
 
-use rettle::ingredient::{Argument, Pour};
-use rettle::tea::Tea;
+use rettle::{
+    Argument, 
+    Pour,
+    Tea,
+};
 
 use serde::Serialize;
 use std::any::Any;
@@ -122,8 +125,10 @@ fn pour_to_es<T: Tea + Send + Debug + Serialize + 'static>(tea_batch: Vec<Box<dy
 mod tests {
     use super::{PourEsArg, PourEsTea};
     use crate::client::EsClient;
-    use rettle::tea::Tea;
-    use rettle::pot::Pot;
+    use rettle::{
+        Tea,
+        Pot,
+    };
     use serde::Serialize;
     use std::any::Any;
     use std::sync::Arc;

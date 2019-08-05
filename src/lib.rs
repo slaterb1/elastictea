@@ -10,6 +10,18 @@ Generic Fill Pour Ingredient crate for the `rettle` ETL.
 
 ## Example
 ```ignore
+#[derive(Serialize, Deserialize, Debug)]
+struct ElasticTea {
+    name: Option<String>,
+    avg: Option<f32>,
+}
+
+impl Tea for ElasticTea {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
 fn main() {
     let es_client = Arc::new(EsClient::new("http://localhost:9200"));
     let test_fill_esarg = FillEsArg::new(
@@ -49,3 +61,7 @@ fn main() {
 pub mod client;
 pub mod fill;
 pub mod pour;
+
+// Re-exports
+pub use self::fill::{FillEsArg, FillEsTea};
+pub use self::pour::{PourEsArg, PourEsTea};

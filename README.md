@@ -9,6 +9,18 @@ Generic Fill Pour Ingredient crate for the `rettle` ETL.
 
 ## Example
 ```rust
+#[derive(Serialize, Deserialize, Debug)]
+struct ElasticTea {
+    name: Option<String>,
+    avg: Option<f32>,
+}
+
+impl Tea for ElasticTea {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
 fn main() {
     let es_client = Arc::new(EsClient::new("http://localhost:9200"));
     let test_fill_esarg = FillEsArg::new(

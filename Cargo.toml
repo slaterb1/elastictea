@@ -3,9 +3,14 @@ name = "elastictea"
 version = "1.0.0"
 authors = ["Benjamin Slater <benjamin.ed.slater@gmail.com>"]
 edition = "2018"
+readme = "README.md"
+documentation = "https://docs.rs/elastictea"
+repository = "https://github.com/slaterb1/elastictea"
+description = "An Ingredient crate for working with Elasticsearch in rettle."
+license = "MIT OR Apache-2.0"
 
 [dependencies]
-rettle = { git = "ssh://git@github.com/slaterb1/rettle" }
+rettle = "1"
 elastic = "=0.21.0-pre.4"
 elastic_derive = "=0.21.0-pre.4"
 serde_json = "1"
