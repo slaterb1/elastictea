@@ -3,7 +3,7 @@ use elastictea::pour::{PourEsArg, PourEsTea};
 use elastictea::client::EsClient;
 
 use rettle::tea::Tea;
-use rettle::brewer::Brewery;
+use rettle::brewery::Brewery;
 use rettle::pot::Pot;
 
 use std::any::Any;
