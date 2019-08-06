@@ -1,6 +1,6 @@
 [package]
 name = "elastictea"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Benjamin Slater <benjamin.ed.slater@gmail.com>"]
 edition = "2018"
 readme = "README.md"
@@ -15,3 +15,7 @@ elastic = "=0.21.0-pre.4"
 elastic_derive = "=0.21.0-pre.4"
 serde_json = "1"
 serde = "1"
+
+[badges]
+travis-ci = { repository = "slaterb1/elastictea" }
+maintenance = { status = "actively-developed" }
