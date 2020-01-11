@@ -4,7 +4,6 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build Status](https://travis-ci.com/slaterb1/elastictea.svg?branch=master)](https://travis-ci.com/slaterb1/elastictea)
 [![Crates.io Version](https://img.shields.io/crates/v/elastictea.svg)](https://crates.io/crates/elastictea)
-[![Minimum rustc version](https://img.shields.io/badge/rustc-1.35.0+-lightgray.svg)](#rust-version-requirements)
 
 Generic Fill Pour Ingredient crate for the `rettle` ETL.
 
@@ -53,11 +52,11 @@ fn main() {
     let fill_elastictea = FillEsTea::new::<ElasticTea>("elastic_tea_test", "test_index", test_fill_esarg);
     let pour_elastictea = PourEsTea::new::<ElasticTea>("pour_elastic", test_pour_esarg);
 
-    new_pot.add_source(fill_elastictea);
+    new_pot = new_pot.add_source(fill_elastictea);
 
     // Steep operations of choice
     
-    new_pot.add_ingredient(pour_elastictea);
+    new_pot = new_pot.add_ingredient(pour_elastictea);
 
     new_pot.brew(&brewery);
 }

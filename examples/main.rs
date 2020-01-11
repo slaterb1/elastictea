@@ -3,13 +3,10 @@ use elastictea::pour::{PourEsArg, PourEsTea};
 use elastictea::client::EsClient;
 
 use rettle::{
-    Tea,
     Brewery,
     Pot,
 };
 
-use std::any::Any;
-use std::time::Instant;
 use std::sync::Arc;
 use serde::{Serialize, Deserialize};
 use serde_json::json;
@@ -18,12 +15,6 @@ use serde_json::json;
 struct ElasticTea {
     name: Option<String>,
     avg: Option<f32>,
-}
-
-impl Tea for ElasticTea {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 fn main() {
@@ -46,12 +37,12 @@ fn main() {
 
 
 
-    let brewery = Brewery::new(4, Instant::now());
-    let mut new_pot = Pot::new();
+    let brewery = Brewery::new(4);
     let fill_elastictea = FillEsTea::new::<ElasticTea>("elastic_tea_test", "test_index", test_fill_esarg);
     let pour_elastictea = PourEsTea::new::<ElasticTea>("pour_elastic", test_pour_esarg);
 
-    new_pot.add_source(fill_elastictea);
-    new_pot.add_ingredient(pour_elastictea);
+    let new_pot = Pot::new()
+        .add_source(fill_elastictea)
+        .add_ingredient(pour_elastictea);
     new_pot.brew(&brewery);
 }

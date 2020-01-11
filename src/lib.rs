@@ -47,11 +47,11 @@ fn main() {
     let fill_elastictea = FillEsTea::new::<ElasticTea>("elastic_tea_test", "test_index", test_fill_esarg);
     let pour_elastictea = PourEsTea::new::<ElasticTea>("pour_elastic", test_pour_esarg);
 
-    new_pot.add_source(fill_elastictea);
+    new_pot = new_pot.add_source(fill_elastictea);
 
     // Steep operations of choice
     
-    new_pot.add_ingredient(pour_elastictea);
+    new_pot = new_pot.add_ingredient(pour_elastictea);
 
     new_pot.brew(&brewery);
 }
