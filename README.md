@@ -4,7 +4,6 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build Status](https://travis-ci.com/slaterb1/elastictea.svg?branch=master)](https://travis-ci.com/slaterb1/elastictea)
 [![Crates.io Version](https://img.shields.io/crates/v/elastictea.svg)](https://crates.io/crates/elastictea)
-[![Minimum rustc version](https://img.shields.io/badge/rustc-1.35.0+-lightgray.svg)](#rust-version-requirements)
 
 Generic Fill Pour Ingredient crate for the `rettle` ETL.
 
