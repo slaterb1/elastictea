@@ -166,25 +166,15 @@ fn fill_from_es<T: Send + Debug + 'static>(args: &Option<Box<dyn Argument + Send
 mod tests {
     use super::{FillEsArg, FillEsTea};
     use crate::client::EsClient;
-    use rettle::{
-        Tea,
-        Pot,
-    };
+    use rettle::Pot;
     use serde::Deserialize;
     use serde_json::json;
-    use std::any::Any;
     use std::sync::Arc;
 
     #[derive(Default, Clone, Debug, Deserialize)]
     struct TestEsTea {
         name: String,
         value: i32
-    }
-
-    impl Tea for TestEsTea {
-        fn as_any(&self) -> &dyn Any {
-            self
-        }
     }
 
     #[test]
@@ -216,8 +206,8 @@ mod tests {
             Arc::clone(&es_client),
         );
         let fill_estea = FillEsTea::new::<TestEsTea>("test_es", "fixture", es_args);
-        let mut new_pot = Pot::new();
-        new_pot.add_source(fill_estea);
+        let new_pot = Pot::new()
+            .add_source(fill_estea);
         assert_eq!(new_pot.get_sources().len(), 1);
         assert_eq!(new_pot.get_sources()[0].get_name(), "test_es");
     }

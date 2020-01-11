@@ -120,24 +120,14 @@ fn pour_to_es<T: Send + Debug + Serialize + 'static>(tea_batch: Vec<T>, args: &O
 mod tests {
     use super::{PourEsArg, PourEsTea};
     use crate::client::EsClient;
-    use rettle::{
-        Tea,
-        Pot,
-    };
+    use rettle::Pot;
     use serde::Serialize;
-    use std::any::Any;
     use std::sync::Arc;
 
     #[derive(Default, Clone, Debug, Serialize)]
     struct TestEsTea {
         name: String,
         value: i32
-    }
-
-    impl Tea for TestEsTea {
-        fn as_any(&self) -> &dyn Any {
-            self
-        }
     }
 
     #[test]
@@ -161,8 +151,8 @@ mod tests {
             Arc::clone(&es_client),
         );
         let pour_estea = PourEsTea::new::<TestEsTea>("test_es", es_args);
-        let new_pot = Pot::new();
-        new_pot.add_ingredient(pour_estea);
+        let new_pot = Pot::new()
+            .add_ingredient(pour_estea);
         assert_eq!(new_pot.get_recipe().read().unwrap().len(), 1);
         assert_eq!(new_pot.get_recipe().read().unwrap()[0].get_name(), "test_es");
     }
