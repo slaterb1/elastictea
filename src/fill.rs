@@ -6,7 +6,6 @@ use rettle::{
     Fill,
     Brewery,
     make_tea,
-    Tea,
 };
 
 use std::sync::{Arc, RwLock};
@@ -62,7 +61,7 @@ impl FillEsTea {
     /// * `name` - Ingredient name.
     /// * `source` - Ingredient source.
     /// * `params` - Params data structure holding the EsClient and query params for pulling docs.
-    pub fn new<T: Tea + Send + 'static>(name: &str, source: &str, params: FillEsArg) -> Box<Fill> 
+    pub fn new<T: Send + Debug + 'static>(name: &str, source: &str, params: FillEsArg) -> Box<Fill<T>> 
         where for<'de> T: Deserialize<'de>
     {
         Box::new(Fill {
@@ -83,7 +82,7 @@ impl FillEsTea {
 /// * `brewery` - Brewery that processes the data.
 /// * `recipe` - Recipe for the ETL used by the Brewery.
 /// * `tea_batch` - Current batch to be sent and processed
-fn call_brewery(brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>, tea_batch: Vec<Box<dyn Tea + Send>>) {
+fn call_brewery<T: Send + 'static>(brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient<T> + Send + Sync>>>>, tea_batch: Vec<T>) {
     brewery.take_order(|| {
         make_tea(tea_batch, recipe);
     });
@@ -98,7 +97,7 @@ fn call_brewery(brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + S
 /// * `args` - Params specifying the EsClient and query params to get docs.
 /// * `brewery` - Brewery that processes the data.
 /// * `recipe` - Recipe for the ETL used by the Brewery.
-fn fill_from_es<T: Tea + Send + Debug + 'static>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient + Send + Sync>>>>) 
+fn fill_from_es<T: Send + Debug + 'static>(args: &Option<Box<dyn Argument + Send>>, brewery: &Brewery, recipe: Arc<RwLock<Vec<Box<dyn Ingredient<T> + Send + Sync>>>>) 
     where for<'de> T: Deserialize<'de>
 {
     match args {
@@ -129,11 +128,9 @@ fn fill_from_es<T: Tea + Send + Debug + 'static>(args: &Option<Box<dyn Argument 
                 // Inspect res to find errors.
                 match res {
                     Ok(res) => {
-                        let tea_batch: Vec<Box<dyn Tea + Send>> = res
+                        let tea_batch: Vec<T> = res
                             .into_documents()
-                            .map(|tea| {
-                                Box::new(tea) as Box<dyn Tea + Send>
-                            })
+                            .map(|tea| { tea })
                             .collect();
 
                         // If docs are found, send to brewery for processing.

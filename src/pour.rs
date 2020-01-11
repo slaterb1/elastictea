@@ -3,7 +3,6 @@ use crate::client::EsClient;
 use rettle::{
     Argument, 
     Pour,
-    Tea,
 };
 
 use serde::Serialize;
@@ -55,7 +54,7 @@ impl PourEsTea {
     /// * `name` - Ingredient name.
     /// * `source` - Ingredient source.
     /// * `params` - Params data structure holding the EsClient and params for sending docs.
-    pub fn new<T: Tea + Send + Serialize + 'static>(name: &str, params: PourEsArg) -> Box<Pour> {
+    pub fn new<T: Send + Debug + Serialize + 'static>(name: &str, params: PourEsArg) -> Box<Pour<T>> {
         Box::new(Pour {
             name: String::from(name),
             computation: Box::new(|tea_batch, args| {
@@ -73,7 +72,7 @@ impl PourEsTea {
 ///
 /// * `tea_batch` - Current batch of tea to be sent as a bulk request to ES.
 /// * `args` - Params specifying the EsClient and query params to get docs.
-fn pour_to_es<T: Tea + Send + Debug + Serialize + 'static>(tea_batch: Vec<Box<dyn Tea + Send>>, args: &Option<Box<dyn Argument + Send>>) -> Vec<Box<dyn Tea + Send>> {
+fn pour_to_es<T: Send + Debug + Serialize + 'static>(tea_batch: Vec<T>, args: &Option<Box<dyn Argument + Send>>) -> Vec<T> {
     match args {
         None => panic!("Need to pass \"PourEsArg\" configs to run this Pour operation"),
         Some(box_args) => {
@@ -85,7 +84,6 @@ fn pour_to_es<T: Tea + Send + Debug + Serialize + 'static>(tea_batch: Vec<Box<dy
             // Format tea_batch as bulk request
             let bulk_req = tea_batch.iter()
                 .map(|tea| {
-                    let tea = tea.as_any().downcast_ref::<T>().unwrap();
                     bulk_raw().index(tea)
                 });
 
@@ -113,10 +111,7 @@ fn pour_to_es<T: Tea + Send + Debug + Serialize + 'static>(tea_batch: Vec<Box<dy
                 Err(Error::Api(e)) => println!("Failed to send bulk request! REST API Error: {:?}", e),
                 Err(e) => println!("HTTP or JSON failure! Error: {:?}", e),
             }
-                    
-
             tea_batch
-                
         }
     }
 }
